@@ -15,7 +15,7 @@ int main()
         int, 
         DoubleHashProber<std::string, MyStringHash >, 
         std::hash<std::string>, 
-        std::equal_to<std::string> > ht(0.7, dh);
+        std::equal_to<std::string> > ht(0.4, dh);
 
     // This is just arbitrary code. Change it to test whatever you like about your 
     // hash table implementation.
@@ -44,5 +44,18 @@ int main()
     }
     ht.insert({"hi7",17});
     cout << "size: " << ht.size() << endl;
+    cout << "--------------------" << endl;
+    ht.insert({"hi10",18});
+    cout << "size: " << ht.size() << endl;
+    ht.insert({"hi11",19});
+    cout << "size: " << ht.size() << endl;
+    ht.insert({"hi12",20});
+    cout << "size: " << ht.size() << endl;
+    if( ht.find("hi12") != nullptr ){
+        cout << "Found hi12" << endl;
+    }
+    else {
+        cout << "Did not find hi9" << endl;
+    }
     return 0;
 }

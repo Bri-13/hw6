@@ -337,6 +337,7 @@ void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
     HashItem* exists = internalFind(p.first);
     if(exists != nullptr){
         exists->item.second = p.second;
+        exists->deleted = false;
         return;
     }
     
