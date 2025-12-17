@@ -334,8 +334,14 @@ size_t HashTable<K,V,Prober,Hash,KEqual>::size() const
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
 {
+    HashItem* exists = internalFind(p.first);
+    if(exists != nullptr){
+        exists->item.second = p.second;
+        return;
+    }
+    
     // resize if threshold reached
-    if((((double)(numItems_+1)) / CAPACITIES[mIndex_]) >= resizeAlpha_){
+    if((((double)(numItems_+1)) / CAPACITIES[mIndex_]) > resizeAlpha_){
         resize();
     }
 
@@ -346,14 +352,11 @@ void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
     }
 
     // check if item exists
-    if((table_[location] != nullptr) && (!table_[location]->deleted) && kequal_(table_[location]->item.first, p.first)){
-        table_[location]->item.second = p.second;
+    if(table_[location] != nullptr){
+        delete table_[location];
     }
-    else{
-        // insert new item
-        table_[location] = new HashItem(p);
-        numItems_++;
-    }
+    table_[location] = new HashItem(p);
+    numItems_++;
 }
 
 // To be completed
@@ -442,9 +445,10 @@ void HashTable<K,V,Prober,Hash,KEqual>::resize()
 {
     std::vector<HashItem*> pastTable = table_;
     mIndex_++;
-    table_.clear();
-    table_.resize(CAPACITIES[mIndex_], nullptr);
-    numItems_ = 0;
+    if(mIndex_ >= 28){
+        throw std::logic_error("max capacity was reached");
+    }
+    table_.assign(CAPACITIES[mIndex_], nullptr);
     
     for(size_t i=0; i<pastTable.size(); i++){
         HashItem* it = pastTable[i];
@@ -453,7 +457,13 @@ void HashTable<K,V,Prober,Hash,KEqual>::resize()
                 delete it;
             }
             else{
-                insert(it->item);
+                HASH_INDEX_T h = hash_(it->item.first) % CAPACITIES[mIndex_];
+                prober_.init(h, CAPACITIES[mIndex_], it->item.first);
+                HASH_INDEX_T location = prober_.next();
+                while(table_[location] != nullptr){
+                    location = prober_.next();
+                }
+                table_[location] = it;
             }
         }
     }
