@@ -342,8 +342,6 @@ void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
     
     // resize if threshold reached
     if((((double)(numItems_)) / CAPACITIES[mIndex_]) >= resizeAlpha_){
-        std::cout << "items: " << numItems_ << std::endl;
-        std::cout << "capacity: " << CAPACITIES[mIndex_] << std::endl;
         resize();
     }
 
